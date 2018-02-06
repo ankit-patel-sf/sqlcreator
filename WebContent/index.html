@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>SQL Creator</title>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+	<script>
+		$( function() {
+
+			// Initialize the Tabs
+			$( "#tabs" ).tabs();
+
+			// Initialize the Marketer Form Items
+			$( "#mrktpub_form_type" ).selectmenu();
+			$( "#mrktpub_form_package" ).selectmenu();
+			$( 'input[type="checkbox"]' ).checkboxradio();
+			
+
+			$('input[type="text"]').addClass("ui-widget ui-widget-content ui-corner-all");
+			$( ".widget input[type=submit], .widget a, .widget button" ).button();
+
+			/*
+			 * This method handles how the form is submitted.
+			 * 
+			 */
+			$("#mrktpub_form").submit(function(e) {
+				
+				// Basic validation
+				var selectedType = $('#mrktpub_form_type').find(":selected").text();
+				var selectedPackage = $('#mrktpub_form_package').find(":selected").text();
+				
+				if(selectedPackage == null || selectedPackage == ""){
+					$('<div />').html('Please select a Package Type').dialog();
+					return;
+				}
+				if(selectedType == null || selectedType == ""){
+					$('<div />').html('Please select a client Type').dialog();
+					return;
+				}
+
+			    var url = "http://localhost:8080/SqlCreator/GenerateSql"; 
+			
+			    $.ajax({
+			           type: "POST",
+			           url: url,
+			           data: $("#mrktpub_form").serialize(), // serializes the form's elements.
+			           success: function(data)
+			           {
+			               //alert(data); // show response from the php script.
+			               $("#mrktpub_output").html(data);
+			           }
+			         });
+			
+			    e.preventDefault(); // avoid to execute the actual submit of the form.
+			});
+			
+			
+			/*
+			 * This method handles Rretrieving JSON to populate the Org Parameters and Waffle Flags
+			 * 
+			 */
+			$( "#mrktpub_form_package" ).on( "selectmenuchange", function( event, ui ) {
+				
+				var selectedPackage = ui.item.value;
+				var selectedType = $('#mrktpub_form_type').find(":selected").text();
+				
+				// Basic validation
+				if(selectedType == null || selectedType == ""){
+					$('<div />').html('Please select a client Type').dialog();
+					$("#mrktpub_form_package")[0].selectedIndex = 0;
+					return;
+				}
+				
+				// These variables hold the html that will be displayed in the table.
+				var defaultOrgTable = "";
+				var optionalOrgTable = "";
+				var defaultWaffleTable = "";
+				var optionalWaffleTable = "";
+				var defaultProviderTable = "";
+				var optionalProviderTable = "";
+				
+				// Let's clear out the tables if they are already populated
+				$('#mrktpub_defaultorgarea').html(defaultOrgTable);
+	  			$('#mrktpub_optorgarea').html(optionalOrgTable);
+	  			$('#mrktpub_defaultwaffleparams').html(defaultWaffleTable);
+	  			$('#mrktpub_optwaffleparams').html(optionalWaffleTable);
+	  			$('#mrktpub_defaultdataprovidersarea').html(defaultProviderTable);
+	  			$('#mrktpub_optdataprovidersarea').html(optionalProviderTable);
+	  			
+	  			$("#mrktpub_tablediv").hide();
+	  			
+				
+	  			// These variables just hold the counter - needed these since original order was alphabethical ascending
+				defaultOrgCount = 0;
+				optionalOrgCount = 0;
+				defaultWaffleCount = 0;
+				optionalWaffleCount = 0;
+				defaultProviderCount = 0;
+				optionalProviderCount = 0;
+				count = 0;
+	  			
+				var retrieveFlagApi = "http://localhost:8080/SqlCreator/RetrieveFlags?selectedType=" + selectedType + "&selectedPackage=" + selectedPackage;
+				$.getJSON( retrieveFlagApi)
+					.done(function( data ) {
+				      
+				    	$.each(data, function() {
+			  				
+	  					isChecked = this['isChecked'];
+	  					isDefault = false;
+	  					if(this['default'] == "true"){
+	  						isDefault = true;
+	  					}
+		  				
+	  					if(this['type'] == "orgParam"){
+		  					if(isDefault){
+		  						defaultOrgCount++;
+		  						count = defaultOrgCount;
+		  					}else {
+		  						optionalOrgCount++;
+		  						count = optionalOrgCount;
+		  					}
+		  				}else if(this['type'] == "waffleFlag"){
+							if(isDefault){
+		  						defaultWaffleCount++;
+		  						count = defaultWaffleCount;
+		  					}else {
+		  						optionalWaffleCount++;
+		  						count = optionalWaffleCount;
+		  					}
+		  				}else if(this['type'] == "dataProvider"){
+							if(isDefault){
+								defaultProviderCount++;
+		  						count = defaultProviderCount;
+		  					}else {
+		  						optionalProviderCount++;
+		  						count = optionalProviderCount;
+		  					}
+		  				}
+	  					
+		  				tempHtml = '<tr>';
+		  				tempHtml = tempHtml + '<th scope="row">' + count + '</th>';
+		  				tempHtml = tempHtml + '<td><input type="checkbox" ' + isChecked + ' name="mrktpub_' + this['type'] + "_" + this['name'] + '" id="mrktpub_' + this['type'] + "_" + this['name'] + '"></td>';
+		  				tempHtml = tempHtml + '<td>' + this['name'] + '</td>';
+		  				tempHtml = tempHtml + '<td>' + this['description'] + '</td>';
+		  				tempHtml = tempHtml + '</tr>';
+
+		  				
+		  				if(this['type'] == "orgParam"){
+		  					if(isDefault){
+		  						defaultOrgTable = defaultOrgTable + tempHtml;
+		  					}else {
+		  						optionalOrgTable = optionalOrgTable + tempHtml;
+		  					}
+		  				}else if(this['type'] == "waffleFlag"){
+							if(isDefault){
+		  						defaultWaffleTable = defaultWaffleTable + tempHtml;
+		  					}else {
+		  						optionalWaffleTable = optionalWaffleTable + tempHtml;
+		  					}
+		  				}else if(this['type'] == "dataProvider"){
+							if(isDefault){
+								defaultProviderTable = defaultProviderTable + tempHtml;
+		  					}else {
+		  						optionalProviderTable = optionalProviderTable + tempHtml;
+		  					}
+		  				}
+		  				
+		  			});
+
+		  			$('#mrktpub_defaultorgarea').html(defaultOrgTable);
+		  			$('#mrktpub_optorgarea').html(optionalOrgTable);
+		  			$('#mrktpub_defaultwaffleparams').html(defaultWaffleTable);
+		  			$('#mrktpub_optwaffleparams').html(optionalWaffleTable);
+		  			$('#mrktpub_defaultdataprovidersarea').html(defaultProviderTable);
+		  			$('#mrktpub_optdataprovidersarea').html(optionalProviderTable);
+		  			
+		  			$("#mrktpub_tablediv").show("slow");
+				    	
+				    });
+				
+			} );
+
+} );
+
+
+
+
+
+
+
+</script>
+
+</head>
+<body>
+
+	<!-- Optional JavaScript -->
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	<!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+
+
+	<div class="container">
+		<header class="header clearfix">
+			<nav>
+				<ul class="nav nav-pills float-right">
+					<li class="nav-item">
+						<a class="nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">About</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">Contact</a>
+					</li>
+				</ul>
+			</nav>
+			<h3 class="text-muted">SQL Creator</h3>
+		</header>
+
+		<main role="main">
+
+			<div>
+
+				<div id="tabs">
+					<ul>
+						<li><a href="#marketertab">Account Creation</a></li>
+						<!-- <li><a href="#publishertab">Publisher</a></li>  -->
+					</ul>
+					<div id="marketertab">
+
+						<form id="mrktpub_form" action="get" >
+							<table class="table">
+								<thead>
+									<tr>
+										<th scope="col">Field</th>
+										<th scope="col">Value</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>Client Type</td>
+										<td><select name="mrktpub_form_type" id="mrktpub_form_type">
+											<option selected="selected"></option>
+											<option>Marketer</option>
+											<option>Publisher</option>
+										</select>
+									</td>
+								</tr>
+									<tr>
+										<td>Package Purchased</td>
+										<td><select name="mrktpub_form_package" id="mrktpub_form_package">
+											<option selected="selected"></option>
+											<option>Standard</option>
+											<option>Premium</option>
+											<option>Enterprise</option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td>Org UUID</td>
+									<td><input type="text" name="mrktpub_form_uuid" id="mrktpub_form_uuid"/></td>
+								</tr>
+								<tr>
+									<td>Org Namespace</td>
+									<td><input type="text" name="mrktpub_form_namespace" id="mrktpub_form_namespace"/></td>
+								</tr>
+								<tr>
+									<td>Lookback Window (days)</td>
+									<td><input type="text" name="mrktpub_form_lookback" id="mrktpub_form_lookback"/></td>
+								</tr>
+								<tr>
+									<td>Enable Data Studio</td>
+									<td>
+										<label for="mrktpub_form_enabledatastudio_true">Yes</label>
+										    <input type="checkbox" name="mrktpub_form_enabledatastudio_true" id="mrktpub_form_enabledatastudio_true">
+									</td>
+								</tr>
+								<tr>
+									<td>Email Address (For Data Studio)</td>
+									<td><input type="text" name="mrktpub_form_email" id="mrktpub_form_email"/></td>
+								</tr>
+
+
+								
+							</tbody>
+						</table>
+					<br>
+					<div id="mrktpub_tablediv" style="display:none;">
+					<label for="mrktpub_defaultorgparams">Default Org Parameters</label>
+					<table id="mrktpub_defaultorgparams" class="table table-sm table-hover">
+						<thead>
+							<tr>
+								<th scope="col">#</th>
+								<th scope="col">Select</th>
+								<th scope="col">Org Parameter Name</th>
+								<th scope="col">Description</th>
+							</tr>
+						</thead>
+						<tbody id="mrktpub_defaultorgarea">
+							
+						</tbody>
+					</table>
+					<br/>
+					<label for="mrktpub_optorgparams">Optional Org Parameters</label>
+					<table id="mrktpub_optorgparams" class="table table-sm table-hover">
+						<thead>
+							<tr>
+								<th scope="col">#</th>
+								<th scope="col">Select</th>
+								<th scope="col">Org Parameter Name</th>
+								<th scope="col">Description</th>
+							</tr>
+						</thead>
+						<tbody id="mrktpub_optorgarea">
+							
+						</tbody>
+					</table>
+					<br/>
+					<label for="mrktpub_defaultwaffleparams">Default Waffle Flags</label>
+					<table id="mrktpub_defaultwaffleparams" class="table table-sm table-hover">
+						<thead>
+							<tr>
+								<th scope="col">#</th>
+								<th scope="col">Select</th>
+								<th scope="col">Waffle Flag Name</th>
+								<th scope="col">Description</th>
+							</tr>
+						</thead>
+						<tbody id="mrktpub_defaultwafflearea">
+							
+						</tbody>
+					</table>
+					<br/>
+					<label for="mrktpub_optwaffleparams">Optional Waffle Flags</label>
+					<table id="mrktpub_optwaffleparams" class="table table-sm table-hover">
+						<thead>
+							<tr>
+								<th scope="col">#</th>
+								<th scope="col">Select</th>
+								<th scope="col">Waffle Flag Name</th>
+								<th scope="col">Description</th>
+							</tr>
+						</thead>
+						<tbody id="mrktpub_optwafflearea">
+							
+						</tbody>
+					</table>
+<br/>
+					<label for="mrktpub_defaultdataprovidersparams">Default Data Providers</label>
+					<table id="mrktpub_defaultdataprovidersparams" class="table table-sm table-hover">
+						<thead>
+							<tr>
+								<th scope="col">#</th>
+								<th scope="col">Select</th>
+								<th scope="col">Data Provider Name</th>
+								<th scope="col">Description</th>
+							</tr>
+						</thead>
+						<tbody id="mrktpub_defaultdataprovidersarea">
+							
+						</tbody>
+					</table>
+					<br/>
+					<label for="mrktpub_optdataprovidersparams">Optional Data Providers</label>
+					<table id="mrktpub_optdataprovidersparams" class="table table-sm table-hover">
+						<thead>
+							<tr>
+								<th scope="col">#</th>
+								<th scope="col">Select</th>
+								<th scope="col">Data Provider Name</th>
+								<th scope="col">Description</th>
+							</tr>
+						</thead>
+						<tbody id="mrktpub_optdataprovidersarea">
+							
+						</tbody>
+					</table>
+
+				<br>
+				</div>
+
+				<input type="submit" id="mrktpub_generatesqlbutton" value="Generate SQL">
+				<br><br>
+
+				<fieldset>
+
+					
+					<textarea name="mrktpub_output" cols="120" rows="18" id="mrktpub_output"></textarea>
+
+
+
+				</fieldset>
+
+
+			</form>
+
+
+
+
+		</div>
+		<!-- 
+		<div id="publishertab">
+			<p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
+		</div>
+		 -->
+	</div>
+
+</div>
+
+</main>
+
+<footer class="footer">
+
+</footer>
+
+</div> <!-- /container -->
+
+
+</body>
+</html>

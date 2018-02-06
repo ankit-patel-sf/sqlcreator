@@ -1,0 +1,31 @@
+#flagname|type|applies_for|marketer_standard|marketer_premium|marketer_enterprise|publisher_standard|publisher_premium|publisher_enteprise|description|sql
+run_adm|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("run_adm", "true", @orgID)
+bucketeer_enabled|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("bucketeer_enabled", "true", @orgID)
+compute_krux_segments|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("compute_krux_segments", "true", @orgID)
+run_search|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("run_search", "true", @orgID)
+config_source|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("config_source", "true", @orgID)
+run_supertag|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("run_supertag", "true", @orgID)
+timezone|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("timezone", "UTC", @orgID)
+data_sentry_mode|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("data_sentry_mode", "basic", @orgID)
+run_return_visitor_analysis|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("run_return_visitor_analysis", "true", @orgID)
+lookalike_classifier_class|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("lookalike_classifier_class", "NBClassifier", @orgID)
+run_refresh_segments|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("run_refresh_segments", "true", @orgID)
+run_lookalike|orgParam|pub|FALSE|FALSE|FALSE|TRUE|TRUE|TRUE|Publisher Only|("run_lookalike","true", @orgID)
+control_tag_namespace|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("control_tag_namespace", @controlTagNamespace, @orgID)
+ad_impression_pixel_type|orgParam|mrkt_pub|TRUE|TRUE|TRUE|FALSE|FALSE|FALSE|Coming soon|("ad_impression_pixel_type", "marketer", @orgID)
+segment_lookback_days|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("segment_lookback_days", if(@segmentLookbackWindow != '', @segmentLookbackWindow, 90), @orgID)
+context_terms|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("context_terms", "true", @orgID)
+dfp_premium|orgParam|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|("dfp_premium", "true", @orgID)
+run_cdim|orgParam|mrkt_pub|FALSE|FALSE|FALSE|FALSE|FALSE|FALSE|Enable Probabilistic CDIM|("run_cdim","true", @orgID)
+no_pii|orgParam|mrkt_pub|FALSE|FALSE|FALSE|FALSE|FALSE|FALSE|Coming soon|("no_pii","true", @orgID)
+klever_toggle|waffleFlag|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|'klever_toggle'
+audience_profile_redshift|waffleFlag|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Coming soon|'audience_profile_redshift'
+segment_3rd_party_extension|waffleFlag|mrkt_pub|TRUE|TRUE|TRUE|FALSE|TRUE|TRUE|Coming soon|'segment_3rd_party_extension'
+media_attributes|waffleFlag|mrkt_pub|TRUE|TRUE|TRUE|FALSE|FALSE|FALSE|Coming soon|'media_attributes'
+split_segments|waffleFlag|mrkt_pub|FALSE|FALSE|FALSE|FALSE|FALSE|FALSE|Split Segments|'split_segments'
+persistent_seg|waffleFlag|mrkt_pub|FALSE|FALSE|FALSE|FALSE|TRUE|TRUE|Persistent Segments|'persistent_seg'
+cdim|waffleFlag|mrkt_pub|FALSE|FALSE|FALSE|FALSE|FALSE|FALSE|Enable Probabilistic CDIM|'cdim'
+txn_segment|waffleFlag|mrkt_pub|FALSE|FALSE|FALSE|FALSE|TRUE|TRUE|Transaction Segments|'txn_segment'
+custom_index_report|waffleFlag|mrkt_pub|FALSE|FALSE|FALSE|FALSE|FALSE|FALSE|Machine Discovery -- Index Map product (UPSELL ONLY)|'custom_index_report'
+Technographic|dataProvider|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Technographic|'123ce4a7-cacb-424b-9e47-800eff2ef498'
+Geographic|dataProvider|mrkt_pub|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|Geographic|'d7e13d9d-704e-41ec-b740-b235bd13e197'

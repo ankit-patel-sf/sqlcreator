@@ -1,0 +1,50 @@
+/***********************************************************************************************/
+/*************************************MARKETER*****************************************/
+/***********************************************************************************************/
+SET @orgUUID = '[[orguuid]]';
+SET @controlTagNamespace = '[[namespace]]';
+SET @segmentLookbackWindow = '[[lookback]]';  -- (max 180 Days)
+ 
+/**********************************DO NOT EDIT BELOW*********************************************/
+SELECT id into @orgID from organizations where organization_uuid = @orgUUID;
+SELECT group_id into @groupID from organizations where organization_uuid = @orgUUID;
+ 
+start transaction;
+-- Organization parameters
+INSERT INTO organization_parameters  (name, value, organization_id) VALUES
+[[orgparameters]]
+ON DUPLICATE KEY UPDATE name=VALUES(name), value=VALUES(value);
+ 
+/****************************************************************/
+/* If Client has Link Marketer Edition, uncomment the following */
+ 
+[[enabledatastudio_1]]
+SET @linkUserEmail = '[[linkemail]]';
+UPDATE organizations set is_buyers_organization = 1, category_id = '1' where id = @orgID;
+INSERT INTO organization_parameters (name, value, organization_id)
+VALUES
+("link_user_email", @linkUserEmail, @orgID),
+("link_direct_user_email", @linkUserEmail, @orgID),
+("enable_link", "true", @orgID)
+ON DUPLICATE KEY UPDATE name=VALUES(name), value=VALUES(value);
+[[enabledatastudio_2]]
+ 
+/* End Link Marketer Edition section */
+/****************************************************************/
+ 
+-- Waffle flags
+INSERT IGNORE INTO waffle_flag_groups (flag_id, group_id)
+SELECT id, @groupID FROM waffle_flag where name in (
+[[waffleflags]]
+);
+ 
+-- Data Providers
+INSERT IGNORE INTO organization_data_providers (organization_id, data_provider_id)
+SELECT @orgID, id FROM data_providers where data_provider_uuid in (
+-- default data providers:
+[[dataproviders]]
+-- additional data providers:
+-- "DP_UUID_HERE"
+);
+ 
+-- commit or rollback
